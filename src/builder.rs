@@ -1,6 +1,7 @@
+use clap::Error;
+use quick_xml::se::to_string;
 use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
-use quick_xml::{DeError, se::to_string};
 
 #[derive(Debug, Serialize, PartialEq, Eq)]
 #[serde(rename = "urlset")]
@@ -8,7 +9,7 @@ pub(crate) struct UrlSet {
     #[serde(rename = "@xlmns")]
     pub xlmns: String,
 
-    pub urls: Vec<Url>
+    pub urls: Vec<Url>,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -24,15 +25,15 @@ impl UrlSet {
             urls: urls
                 .into_iter()
                 .map(|url| Url {
-                    loc: url.replace(".md",".html"),
+                    loc: url.replace(".md", ".html"),
                     priority: Some("1.0".to_string()),
                 })
                 .collect(),
         }
     }
 
-    pub fn to_xml(&self) -> Result<String,DeError> {
-        return to_string(&self);
+    pub fn to_xml(&self) -> Result<String, std::io::Error> {
+        to_string(&self).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
     }
 }
 
